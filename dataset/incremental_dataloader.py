@@ -207,7 +207,9 @@ class IncrementalDataset:
                 
     def new_task(self, memory=None, past_dataset_memory=None):
         # import pdb;pdb.set_trace()
-        print(f"Cur sess: {self.args.sess}, Cur task: {self._current_task}")
+        print("="*100)
+        # print(f"Cur sess: {self.args.sess}, Cur task: {self._current_task}")
+        print(f"Cur task: {self._current_task}")
         print("Increments: ", self.increments)      #classed per task
         min_class = sum(self.increments[:self._current_task]) + self.offset
         max_class = sum(self.increments[:self._current_task + 1]) + self.offset

@@ -37,7 +37,8 @@ class Evaluator():
             acc = curr_task_accs[t]
             bwt = acc - self.task_to_original_acc[t]
             bwt_scores.append(bwt)
-        print(f"Average BWT score: {np.mean(bwt_scores)}")
+        # print(f"Average BWT score: {np.mean(bwt_scores)}")  # 原始输出
+        print(f"Task {self.args.sess}/{self.args.num_task - 1} | BWT: {np.mean(bwt_scores):.4f}")
 
 
     def mask_classes(self, outputs: torch.Tensor, k: int) -> None:
@@ -92,7 +93,8 @@ class Evaluator():
         acc = acc_count*1.0/total_count
         acc = acc.item()
         self.time_step_to_future_task_acc[self.args.sess] = acc
-        print(f"Future tasks avg acc: {np.mean(list(self.time_step_to_future_task_acc.values()))} {acc}")
+        # print(f"Future tasks avg acc: {np.mean(list(self.time_step_to_future_task_acc.values()))} {acc}")  # 原始输出
+        print(f"Task {self.args.sess}/{self.args.num_task - 1} | FWT avg: {np.mean(list(self.time_step_to_future_task_acc.values())):.4f} | FWT last: {acc:.4f}")
         print(f"Total ID examples: {id_preds.shape[0]}, Total OOD examples: {ood_preds.shape[0]}")
         for metric in ["energy"]:#, "softmax", "variance", "variance_softmax", "variance_max_prob"]:
             if "variance" in metric and id_preds.dim() == 2:
@@ -210,8 +212,10 @@ class Evaluator():
             acc_taw = np.mean(accs_mask_classes)
             self.time_step_to_taw_acc[self.args.sess] = acc_taw
 
-            print(f"Acc avg: {np.mean(list(self.time_step_to_acc.values()))}, Acc last: {acc}")
-            print(f"TaW Acc avg: {np.mean(list(self.time_step_to_taw_acc.values()))}, TaW Acc last: {acc_taw}")
+            # print(f"Acc avg: {np.mean(list(self.time_step_to_acc.values()))}, Acc last: {acc}")  # 原始输出
+            # print(f"TaW Acc avg: {np.mean(list(self.time_step_to_taw_acc.values()))}, TaW Acc last: {acc_taw}")  # 原始输出
+            # 清晰输出：带 task 编号的评估结果（一行展示所有指标）
+            print(f"Task {self.args.sess}/{self.args.num_task - 1} | Acc avg: {np.mean(list(self.time_step_to_acc.values())):.4f} | Acc last: {acc:.4f} | TaW avg: {np.mean(list(self.time_step_to_taw_acc.values())):.4f} | TaW last: {acc_taw:.4f}")
 
             if self.args.sess > 0 and self.args.compute_bwt:
                 self.compute_backward_transfer(accs)

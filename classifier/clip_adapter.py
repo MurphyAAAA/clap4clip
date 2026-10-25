@@ -141,7 +141,7 @@ class ClipAdapter(Evaluator):
 
         self.model.eval()
         if self.args.sess >= 0:
-            for epoch in tqdm(range(self.epochs)):
+            for epoch in (range(self.epochs)):
                 for idx, (x, y, index) in tqdm(enumerate(train_loader), total=len(train_loader), desc = 'Training'):
 
                     cur_iter_idx = epoch*per_epoch_steps+idx
@@ -174,7 +174,7 @@ class ClipAdapter(Evaluator):
 
         self.model.eval()
 
-        for epoch in tqdm(range(self.args.finetune_epochs)):
+        for epoch in (range(self.args.finetune_epochs)):
             for idx, (x, y, index) in tqdm(enumerate(memory_loader), total=len(memory_loader), desc = 'Finetuning'):
 
                 cur_iter_idx = epoch*per_epoch_steps+idx

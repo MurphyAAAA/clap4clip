@@ -16,6 +16,21 @@ from utils import mkdir_p
 from dataset.exemplars_selection import *
 from utils.rotation_angle_matrix import RotationAngleMatrix
 
+"""
+cd /mnt/c/MYF/Data/AI_workspace/reproduction/open_source/clap4clip 
+HYDRA_FULL_ERROR=1 python main_incremental_submit.py --db_name cifar100 --model clip_adapter --finetuning --finetune-epochs 2 --num-run 0 --train_batch 32 --exemplar-selector random --root /mnt/c/MYF/Data/AI_workspace/reproduction/datasets/cifar100_toy_CIL_700_samples/ --ckpt_path "ViT-B/16" --arch ViT-B-16 --method er --epochs 5 2>&1 | tee save/cifar100/run.log
+
+HYDRA_FULL_ERROR=1
+    环境变量，针对 Hydra 框架，默认报错只打印一行摘要，设成 1 会打印完整 traceback，方便定位问题
+
+2>&1  Linux 重定向。
+    > 是重定向，2 是 stderr（标准错误流），&1 是 stdout（标准输出流）。2>&1 就是把错误流合并到标准流里，一起输出。不加这个的话，报错信息不会进 tee 文件。
+tee
+    命令，把输出同时做两件事：打印到屏幕 + 写入文件。tee save/cifar100/run.log 就是你在终端能实时看到输出，同时存一份到 run.log 文件。
+"""
+
+
+
 def parse_option():
     parser = argparse.ArgumentParser('Prompt Learning for CLIP', add_help=False)
 
@@ -80,7 +95,7 @@ def parse_option():
     parser.add_argument("--top-k", type=int, default=1, help="top-k samples per label to consider for NP prior derivation")
     parser.add_argument("--exemplar-selector", type=str, default='random', help="Exemplar selection technique for rehearsal")
     parser.add_argument("--compute-ram", action='store_true', default=False, help="Compute Rotation Angle Matrix")
-    parser.add_argument("--compute-bwt", action='store_true', default=False, help="Compute Backward Transfer")
+    parser.add_argument("--compute-bwt", action='store_true', default=True, help="Compute Backward Transfer")  # 默认开启
     
     parser.add_argument("--ortho-loss", default=False, action="store_true", help="orthogonal loss for attri-clip")
     parser.add_argument("--matching-loss", default=False, action="store_true", help="matching loss for attri-clip")
@@ -95,7 +110,7 @@ def parse_option():
     parser.add_argument("--forward-times", type=int, default=10, help="MC samples")
     parser.add_argument("--forward-times-global", type=int, default=10, help="global MC samples")
     parser.add_argument("--hierarchical", action='store_true', default=False, help="use a global encoder")
-    parser.add_argument("--eval-ood-score", action='store_true', default=False, help="evaluate OOD scores")
+    parser.add_argument("--eval-ood-score", action='store_true', default=True, help="evaluate OOD scores")  # 默认开启，计算 FWT
     parser.add_argument("--use-det-path", action="store_true", default=False, help="use deterministic path")
     parser.add_argument("--context-size", type=float, default=0.67, help="Context size for NP prior")
     parser.add_argument("--frozen-prior", action="store_true", default=False, help="use frozen features for prior")
@@ -218,9 +233,9 @@ def main(args):
             inc_dataset.sample_per_task_testing = sample_per_task_testing
             args.sample_per_task_testing = sample_per_task_testing             
             
-        print('ses:',ses)
+        # print('ses:',ses)
         print(task_info)    
-        print(inc_dataset.sample_per_task_testing)     # dict{task:len(test)}
+        print(f"task: test_samples_num -> {inc_dataset.sample_per_task_testing}")     # dict{task:len(test)}
         args.sample_per_task_testing = inc_dataset.sample_per_task_testing
         len_train = task_info['n_train_data']
 
